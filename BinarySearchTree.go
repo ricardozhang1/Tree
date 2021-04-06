@@ -2,253 +2,260 @@ package main
 
 import "fmt"
 
-// Binary Search Trees
-// 二叉查找树
-type BinaryTree struct {
-	root *node
-	n int
+type BinaryTree002 struct {
+	root *Node002
+	size int
 }
 
-// create the node
-func newNode(k, v int) *node {
-	return &node{k: k, v: v, sz: 1}
+// newBinaryTree002 创建一个二叉树
+func newBinaryTree002() *BinaryTree002 {
+	return &BinaryTree002{}
 }
 
-// create binary tree
-func NewBinaryTree() *BinaryTree {
-	return &BinaryTree{}
+// Put 往二叉树中插入元素节点
+func (b *BinaryTree002) Put(k int, v interface{})  {
+	b.root, _ = Put(b.root, k, v)
 }
 
-// 增加或修改
-func (b *BinaryTree) Put(k, v int) {
-	b.root, _ = put(b.root, k, v)
+// Get 获取树中的节点
+func (b *BinaryTree002) Get(k int) interface{} {
+	return Get(b.root, k)
 }
 
-// 查找
-func (b *BinaryTree) Get(k int) int {
-	return get(b.root, k)
+// Size 获取树种节点数目
+func (b *BinaryTree002) Size() int {
+	return sizeNode(b.root)
 }
 
-// 树的大小
-func (b *BinaryTree) Size() int {
-	return size(b.root)
+// Min 获取树中的最小节点
+func (b *BinaryTree002) Min() interface{} {
+	return Min(b.root).value
 }
 
-// 选出最小键
-func (b *BinaryTree) Min() int {
-	return min(b.root).k
+// DeleteMin 删除树中最小的元素
+func (b *BinaryTree002) DeleteMin()  {
+	b.root = DeleteMin(b.root)
 }
 
-// 删除最小键
-func (b *BinaryTree) DeleteMin()  {
-	b.root = deleteMin(b.root)
+// Delete 删除树中指定节点
+func (b *BinaryTree002) Delete(k int)  {
+	b.root = Delete(b.root, k)
 }
 
-// 删除
-func (b *BinaryTree) Delete(k int)  {
-	b.root = delete(b.root, k)
+// MidOrder 中序遍历
+func (b *BinaryTree002) MidOrder()  {
+	MidOrder(b.root)
 }
 
-// 遍历
-// 中序遍历
-func (b *BinaryTree) MidOrder() {
-	midOrder(b.root)
+// PreOrder 前序遍历
+func (b *BinaryTree002) PreOrder()  {
+	PreOrder(b.root)
 }
 
-// 前序遍历
-func (b *BinaryTree) PreOrder() {
-	preOrder(b.root)
+// LastOrder 后序遍历
+func (b *BinaryTree002) LastOrder()  {
+	LastOrder(b.root)
 }
 
-// 后序遍历
-func (b *BinaryTree) LastOrder() {
-	lastOrder(b.root)
+// LayerOrder 层序遍历
+func (b *BinaryTree002) LayerOrder()  {
+	LayerOrder(b.root)
 }
 
-
-// node
-type node struct {
-	k, v, sz int  // 键、值、大小
-	left, right *node  // 左右子节点
+// 节点结构
+type Node002 struct {
+	key int
+	value interface{}
+	sz int
+	left *Node002
+	right *Node002
 }
 
-// 在以nd为根节点的树下增加或修改一个节点
-// 如果创建了新的节点，第二个参数返回true，
-// 如果只是修改，第二个参数返回false
-func put(nd *node, k, v int) (*node, bool) {
-	if nd == nil {
-		return newNode(k, v), true
+// newNode002 创建新的节点
+func newNode002(k int, v interface{}) *Node002 {
+	return &Node002{key: k, value: v, sz: 1}
+}
+
+func Put(n *Node002, k int, v interface{}) (*Node002, bool) {
+	if n == nil {
+		return newNode002(k, v), true
 	}
-	hasNew := false
-
-	if k < nd.k {
-		nd.left, hasNew = put(nd.left, k, v)
-	} else if k > nd.k {
-		nd.right, hasNew = put(nd.right, k, v)
+	addNode := false
+	if k < n.key {
+		n.left, addNode = Put(n.left, k, v)
+	} else if k > n.key {
+		n.right, addNode = Put(n.right, k, v)
 	} else {
-		nd.v = v  // 仅修改，不会增加节点，就不更新树的大小
+		n.value = v
 	}
-
-	if hasNew {
-		updateSize(nd)  // 如果创建了新节点就更新树的大小
+	if addNode {
+		// 修改节点sz数 非叶子节点才会调用
+		updateNodeSize(n)
 	}
-
-	return nd, hasNew
+	return n, addNode
 }
 
-// 在以nd为根节点的树中获取键为k的值
-func get(nd *node, k int) int {
-	if nd == nil {
-		return -1
+func updateNodeSize(n *Node002) {
+	// 参与到递归中
+	if n == nil {
+		return
 	}
-
-	if k < nd.k {
-		return get(nd.left, k)
-	} else if k > nd.k {
-		return get(nd.right, k)
-	} else {
-		return nd.v
-	}
+	n.sz = sizeNode(n.left) + sizeNode(n.right) + 1
 }
 
-// 获取以nd为根节点的树的大小
-func size(nd *node) int {
-	if nd == nil {
+func sizeNode(n *Node002) int {
+	if n == nil {
 		return 0
 	}
-	return nd.sz
+	return n.sz
 }
 
-// 更新以nd为根节点的树的大小
-func updateSize(nd *node) {
-	if nd == nil {
-		return
+func Get(n *Node002, k int) interface{} {
+	if n == nil {
+		return -1
 	}
-	nd.sz = size(nd.left) + size(nd.right) + 1
-}
-
-// 选出以nd为根节点的树的最小键节点
-func min(nd *node) *node {
-	if nd == nil {
-		return nil
-	}
-	if nd.left != nil {
-		return min(nd.left)
-	}
-	return nd
-}
-
-// 删除以nd为根节点的树的最小键节点
-// 返回被删除的节点
-func deleteMin(nd *node) *node {
-	if nd == nil {
-		return nil
-	}
-
-	if nd.left == nil {  // 找到最小节点
-		nd = nd.right  // 用右子节点代替自己
-	} else {  // 还有更小的
-		nd.left = deleteMin(nd.left)
-	}
-	updateSize(nd)
-	return nd
-}
-
-// 删除以nd为根节点的树并且键为k的节点
-func delete(nd *node, k int) *node {
-	if nd == nil {
-		return nil
-	}
-
-	if k < nd.k {
-		nd.left = delete(nd.left, k)
-	} else if k > nd.k {
-		nd.right = delete(nd.right, k)
+	if k < n.key {
+		return Get(n.left, k)
+	} else if k > n.key {
+		return Get(n.right, k)
 	} else {
-		// 删除的的非叶子节点
-		if nd.right == nil {
-			return nd.left
+		return n.value
+	}
+}
+
+func Min(n *Node002) *Node002 {
+	if n == nil {
+		return nil
+	}
+	if n.left != nil {
+		return Min(n.left)
+	}
+	return n
+}
+
+func DeleteMin(n *Node002) *Node002 {
+	if n == nil {
+		return nil
+	}
+	if n.left == nil {
+		n = n.right
+	} else {
+		n.left = DeleteMin(n.left)
+	}
+	updateNodeSize(n)
+	return n
+
+}
+
+func Delete(n *Node002, k int) *Node002 {
+	if n == nil {
+		return nil
+	}
+	if k < n.key {
+		n.left = Delete(n.left, k)
+	} else if k > n.key {
+		n.right = Delete(n.right, k)
+	} else {
+		// 删除非叶子节点
+		if n.right == nil {
+			return n.left
 		}
-		if nd.left == nil {
-			return nd.right
+		if n.left == nil {
+			return n.left
 		}
-		// 同时具有两个子节点
+		// 同时具有两个节点
 		// 先找出大于本节点的最小节点作为后续节点
-		t := nd
-		nd.k = min(t.right).k
+		t := n
+		n.key = Min(t.right).key
 		// 删除
-		deleteMin(t.right)
+		DeleteMin(t.right)
 		// 用后续节点代替本节点
-		nd.left = t.left
+		n = t.left
 	}
-	updateSize(nd)
-	return nd
+	UpdateSize(n)
+	return n
 }
 
-// 以nd为根节点的中序遍历
-func midOrder(nd *node) {
-	if nd == nil {
+func UpdateSize(n *Node002) {
+	if n == nil {
 		return
 	}
-	// 先打印左子节点
-	midOrder(nd.left)
-	// 按照次序打印根节点
-	fmt.Println(nd.k)
-	// 打印右子树
-	midOrder(nd.right)
-}
-// 以nd为根节点的前序遍历
-func preOrder(nd *node)  {
-	if nd == nil {
-		return
-	}
-	// 先打印根节点
-	fmt.Println(nd.k)
-	//然后打印左子节点
-	preOrder(nd.left)
-	//最后打印右子节点
-	preOrder(nd.right)
+	n.sz = Size(n.left) + Size(n.right) + 1
 }
 
-// 以nd为根节点的前序遍历
-func lastOrder(nd *node) {
-	if nd == nil {
-		return
+func Size(n *Node002) int {
+	if n == nil {
+		return 0
 	}
-	// 先遍历右子节点
-	lastOrder(nd.right)
-	// 然后遍历左子节点
-	lastOrder(nd.left)
-	// 最后遍历根节点
-	fmt.Println(nd.k)
+	return n.sz
 }
 
+func MidOrder(n *Node002) {
+	if n == nil {
+		return
+	}
+	MidOrder(n.left)
+	fmt.Printf("%v\n", n.value)
+	MidOrder(n.right)
+}
+
+func PreOrder(n *Node002) {
+	if n == nil {
+		return
+	}
+	fmt.Printf("%v\n", n.value)
+	PreOrder(n.left)
+	PreOrder(n.right)
+}
+
+func LastOrder(n *Node002) {
+	if n == nil {
+		return
+	}
+	LastOrder(n.right)
+	LastOrder(n.left)
+	fmt.Printf("%v\n", n.value)
+}
+
+func LayerOrder(n *Node002) {
+	// 需要创建一个队列
+	temp := make([]*Node002, 0)
+	temp = append(temp, n)
+	var nd *Node002
+	for len(temp) > 0 {
+		nd = temp[0]
+		fmt.Println(nd.value)
+		if nd.left != nil {
+			temp = append(temp, nd.left)
+		}
+		if nd.right != nil {
+			temp = append(temp, nd.right)
+		}
+		temp = temp[1:]
+	}
+}
 
 func main() {
-	b := NewBinaryTree()
-	b.Put(5, 5555)
-	b.Put(4, 4444)
-	b.Put(7, 7777)
-	b.Put(6, 6666)
-	b.Put(8, 8888)
-
-	//fmt.Println(b.Get(8))
-	//fmt.Println(b.Size())
+	b := newBinaryTree002()
+	b.Put(5, "王五")
+	b.Put(3, "张三")
+	b.Put(4, "李四")
+	b.Put(6, "赵六")
+	//b.Put(2, "陈二")
+	//fmt.Println(b.root.sz)
+	//fmt.Println(b.Get(4))
 	//fmt.Println(b.Min())
+
 	//b.DeleteMin()
 	//fmt.Println(b.Get(4))
-	//b.Delete(7)
-	//fmt.Println(b.Size())
-	//b.MidOrder()
-
-	//b.PreOrder()
+	//fmt.Println(b.root.sz)
+	fmt.Println("===========层序遍历==============")
+	b.LayerOrder()
+	fmt.Println("===========前序遍历==============")
+	b.PreOrder()
+	fmt.Println("===========中序遍历==============")
+	b.MidOrder()
+	fmt.Println("===========后序遍历==============")
 	b.LastOrder()
 }
-
-
-
-
-
-
-
 
